@@ -35,19 +35,10 @@ module.exports = class Equipos {
         }
     }
 
-    editarEquipo(id, nombre, descripcion, serial, fechaInicialMarcha, ultimaFechaMarcha, ultimaFechaMantenimiento, idUltimoMantenimiento){
+    editarEquipo(id){
         for (var i = 0; i < this.equipos.length; i++) {
             if (this.equipos[i]['id'] == id.id){
-                this.equipos[i] = {
-                    id: id,
-                    nombre: nombre,
-                    descripcion: descripcion,
-                    serial: serial,
-                    fechaInicialMarcha: fechaInicialMarcha,
-                    ultimaFechaMarcha: ultimaFechaMarcha,
-                    ultimaFechaMantenimiento: ultimaFechaMantenimiento,
-                    idUltimoMantenimiento: idUltimoMantenimiento
-                }
+                this.equipos[i] = id
             }
         }
     }
@@ -55,12 +46,12 @@ module.exports = class Equipos {
     eliminarEquipo(id){
         for (var i = 0; i < this.equipos.length; i++) {
             if (this.equipos[i]['id'] == id.id){
-                this.equipos = this.equipos.splice(i+1,this.equipos.length)
+                this.equipos.splice(i,1)
             }
         }
     }
 
-    insertarEquipo(id, nombre, descripcion, serial, fechaInicialMarcha, ultimaFechaMarcha, ultimaFechaMantenimiento, idUltimoMantenimiento){
+    insertarEquipo(id){
         this.equipos.push(id)
     }
 }

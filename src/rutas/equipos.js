@@ -3,7 +3,7 @@ const router = express.Router()
 
 const Equipos = require('../controladores/equipos.js')
 
-const equiposData = [{
+let equiposData = [{
   "id": 1,
   "nombre": "Victor Delta Bravo Whiskey Juliett Tango Romeo Mike Lima Charlie Yankee Quebec India",
   "descripcion": "blandit lacinia erat vestibulum sed magna at nunc commodo placerat praesent blandit nam nulla integer pede justo lacinia eget tincidunt eget tempus vel pede morbi porttitor lorem id ligula suspendisse ornare consequat lectus in est risus auctor sed tristique in tempus sit amet sem fusce consequat nulla nisl nunc nisl duis bibendum felis sed interdum venenatis turpis enim blandit mi in porttitor pede justo eu massa donec dapibus duis at velit eu est congue elementum in hac habitasse platea dictumst morbi vestibulum",
@@ -236,4 +236,5 @@ router.delete("/eliminar/:id", (req, res) => {
     )
 });
 
-module.exports = router;
+module.exports = router
+module.exports.equipos = equipos
