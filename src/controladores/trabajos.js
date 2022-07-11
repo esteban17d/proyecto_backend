@@ -1,109 +1,84 @@
 module.exports = class Trabajos {
-    constructor(trabajos) {
-        this.trabajos = trabajos;
+    constructor() {
     }
 
-    busquedaBinaria(arr, busqueda) {
-
-        const puntoMedio = Math.floor(arr.length / 2);
-
-        if (arr[puntoMedio].id == busqueda) {
-            return arr[puntoMedio];
-        }
-
-        if (arr[puntoMedio].id < busqueda && arr.length > 1) {
-            return this.busquedaBinaria(arr.slice(puntoMedio), busqueda);
-        }
-
-        if (arr[puntoMedio].id > busqueda && arr.length > 1) {
-            return this.busquedaBinaria(arr.slice(0, puntoMedio), busqueda);
-        }
-        return -1;
-    }
-
-    listarTrabajos(tipo = false){
-        let trabajos_filtrados = []
-        if (tipo == false) {
-            return this.trabajos;
-        }
-        for (var i = 0; i < this.trabajos.length; i++) {
-            if (this.trabajos[i].tipo == tipo) {
-                trabajos_filtrados.push(this.trabajos[i])
-            }
-        }
-        return trabajos_filtrados
-    }
-
-    verTrabajo(id){
-        let trabajo = this.busquedaBinaria(this.trabajos, id.id)
-        if (trabajo == -1) {
-            console.log('No se ha encontrado el elemento por el id')
-        }
-        else {
-            return trabajo
-        }
-    }
-
-    editarTrabajo(id){
-        let equipos = id.equipos.equipos
-        for (var i = 0; i < this.trabajos.length; i++) {
-            if (this.trabajos[i]['id'] == id.id){
-                this.trabajos[i] = {
-                    id: id.id,
-                    fechaPlanificada: id.fechaPlanificada,
-                    fechaInicio: id.fechaInicio,
-                    fechaFinal: id.fechaFinal,
-                    idEquipo: id.idEquipo,
-                    estatus: id.estatus,
-                    tipo: id.tipo
-                }
-                for (var i = 0; i < equipos.length; i++) {
-                    if (equipos[i]['id'] == id.idEquipo){
-                        equipos[i]['idUltimoMantenimiento'] = id.id
-                        if(id.estatus == 'terminado' && id.tipo == 'mantenimiento_general'){
-                            equipos[i]['ultimaFechaMantenimiento'] = id.fechaFinal
-                        }
-                        else {
-                            equipos[i]['ultimaFechaMarcha'] = id.fechaFinal
-                        }
+    listarTrabajos(connection, data){
+        return new Promise(function(resolve, reject) {
+            if (data.tipoAMostrar == "all"){
+                connection.query(`SELECT * FROM Trabajos`, function (err, result, field) {
+                    if (err) {
+                        return reject(err);
                     }
+                    resolve(result);
+                });
+            };
+            connection.query(`SELECT * FROM Trabajos WHERE tipo = "${data.tipoAMostrar}"`, function (err, result, field) {
+                if (err) {
+                    return reject(err);
                 }
-                return equipos        
+                resolve(result);
+            });
+        });
+    };
+
+    verTrabajo(connection, data){
+        return new Promise(function(resolve, reject) {
+            connection.query(`SELECT * FROM Trabajos WHERE id = ${data.id}`, function (err, result, field) {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        });
+    };
+
+    editarTrabajo(connection, data){
+        if (data.elementoEditar = "fechaFinal"){
+            if (data.estatus == "terminado"){
+                connection.query(`UPDATE Equipos SET ultimaFechaMarcha = "${data.valor}" WHERE id = ${data.idEquipo}`, function(err, result) {
+                    if (err) throw err;
+                })                    
+            }else {
+                connection.query(`UPDATE Equipos SET ultimaFechaMantenimiento = "${data.valor}" WHERE id = ${data.idEquipo}`, function(err, result) {
+                    if (err) throw err;
+                });                    
             }
+
         }
+        connection.query(`UPDATE Trabajos SET ${data.elementoEditar} = "${data.valor}" WHERE id = ${data.id}`, function(err, result) {
+            if (err) throw err;
+        });
     }
 
-    eliminarTrabajo(id){
-        for (var i = 0; i < this.trabajos.length; i++) {
-            if (this.trabajos[i]['id'] == id.id){
-                this.trabajos.splice(i,1)
-            }
-        }
-    }
+    eliminarTrabajo(connection, data){
+        connection.query(`DELETE FROM Trabajos WHERE Id = ${data.id}`, function(err, result) {
+            if (err) throw err;
+        });
+    };
 
-    insertarTrabajo(id){
-        let equipos = id.equipos.equipos
-        this.trabajos.push({
-            id: id.id,
-            fechaPlanificada: id.fechaPlanificada,
-            fechaInicio: id.fechaInicio,
-            fechaFinal: id.fechaFinal,
-            idEquipo: id.idEquipo,
-            estatus: id.estatus,
-            tipo: id.tipo
-        })
-        for (var i = 0; i < equipos.length; i++) {
-            if (equipos[i]['id'] == id.idEquipo){
-                equipos[i]['idUltimoMantenimiento'] = id.id
-                if(id.estatus == 'terminado' && id.tipo == 'mantenimiento_general'){
-                    equipos[i]['ultimaFechaMantenimiento'] = id.fechaFinal
-                    }
-                else {
-                    equipos[i]['ultimaFechaMarcha'] = id.fechaFinal
-                }
-            }
+    insertarTrabajo(connection, data){
+        if (data.estatus == "terminado"){
+            connection.query(`UPDATE Equipos SET ultimaFechaMarcha = "${data.fechaFinal}" WHERE id = ${data.idEquipo}`, function(err, result) {
+                if (err) throw err;
+            })                    
+        }else {
+            connection.query(`UPDATE Equipos SET ultimaFechaMantenimiento = "${data.fechaFinal}" WHERE id = ${data.idEquipo}`, function(err, result) {
+                if (err) throw err;
+            });                    
         }
-        return equipos
+
+        connection.query(
+            `INSERT INTO Trabajos (fechaPlanificada, fechaInicio, fechaFinal, idEquipo, estatus, tipo)
+            VALUES 
+            (
+                "${data.fechaPlanificada}",
+                "${data.fechaInicio}",
+                "${data.fechaFinal}",
+                "${data.idEquipo}",
+                "${data.estatus}",
+                "${data.tipo}")`, function (err, result) {
+            if (err) throw err;
+        });
     }
 }
 
